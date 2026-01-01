@@ -1,0 +1,10 @@
+{
+  "name": "notes",
+  "description": "Search and browse Apple Notes from the command line",
+  "version": "1.0.0",
+  "author": {
+    "name": "Lucas Carlson"
+  },
+  "repository": "https://github.com/cardmagic/notes",
+  "keywords": ["macos", "apple", "notes", "search", "mcp"]
+}

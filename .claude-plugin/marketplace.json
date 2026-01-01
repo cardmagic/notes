@@ -1,0 +1,11 @@
+{
+  "name": "cardmagic",
+  "plugins": [
+    {
+      "name": "notes",
+      "source": "./",
+      "description": "Search and browse Apple Notes with fuzzy matching",
+      "version": "1.0.0"
+    }
+  ]
+}

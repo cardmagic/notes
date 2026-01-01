@@ -1,0 +1,60 @@
+{
+  "name": "@cardmagic/notes",
+  "version": "1.0.0",
+  "description": "CLI and MCP server to search and browse Apple Notes",
+  "author": {
+    "name": "Lucas Carlson"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cardmagic/notes"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "notes": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "check-format": "oxfmt --check",
+    "postinstall": "node -e \"try{require('child_process').execSync('npm rebuild better-sqlite3',{stdio:'inherit'})}catch(e){}\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "11.6.0",
+    "chalk": "5.3.0",
+    "commander": "12.1.0",
+    "minisearch": "7.1.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "oxlint": "^0.12.0"
+  },
+  "keywords": [
+    "apple",
+    "notes",
+    "macos",
+    "search",
+    "mcp",
+    "cli"
+  ],
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild"
+    ]
+  }
+}
