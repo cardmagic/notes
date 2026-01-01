@@ -1,6 +1,6 @@
 {
   "name": "@cardmagic/notes",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI and MCP server to search and browse Apple Notes",
   "author": {
     "name": "Lucas Carlson"

@@ -1,4 +1,10 @@
 import { Command } from 'commander';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
 import { buildIndex, updateIndex, indexNeedsRebuild } from './indexer.js';
 import {
   searchNotes,
@@ -23,7 +29,7 @@ const program = new Command();
 program
   .name('notes')
   .description('CLI tool to search and browse Apple Notes')
-  .version('1.0.0');
+  .version(pkg.version);
 
 program
   .command('search <query>')
