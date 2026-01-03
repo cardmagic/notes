@@ -32,7 +32,7 @@ Install as a plugin to get skills (auto-invoked) and slash commands:
 
 ```bash
 # Add the marketplace
-claude plugin marketplace add cardmagic/notes
+claude plugin marketplace add cardmagic/ai-marketplace
 
 # Install the plugin
 claude plugin install notes@cardmagic
@@ -65,7 +65,7 @@ cd notes
 make install
 
 # Then add as plugin OR MCP server:
-claude plugin marketplace add cardmagic/notes
+claude plugin marketplace add cardmagic/ai-marketplace
 claude plugin install notes@cardmagic
 # OR
 claude mcp add --transport stdio notes -- notes --mcp
