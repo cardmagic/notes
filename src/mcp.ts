@@ -12,6 +12,7 @@ import {
   listFolders,
   getNoteStats,
 } from './searcher.js';
+import { createNote, deleteNote } from './applescript.js';
 import type { IndexedNote, SearchResult } from './types.js';
 
 function formatNoteForMcp(note: IndexedNote): string {
@@ -163,6 +164,46 @@ export async function runMcpServer(): Promise<void> {
           properties: {},
         },
       },
+      {
+        name: 'create_note',
+        description: 'Create a new note in Apple Notes',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'Title of the note',
+            },
+            body: {
+              type: 'string',
+              description: 'Body content of the note',
+            },
+            folder: {
+              type: 'string',
+              description: 'Folder to create the note in (default: "Notes")',
+            },
+          },
+          required: ['title', 'body'],
+        },
+      },
+      {
+        name: 'delete_note',
+        description: 'Delete a note from Apple Notes by its title',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'Title of the note to delete',
+            },
+            folder: {
+              type: 'string',
+              description: 'Optional folder containing the note (helps find the correct note if multiple notes have the same title)',
+            },
+          },
+          required: ['title'],
+        },
+      },
     ],
   }));
 
@@ -308,6 +349,29 @@ export async function runMcpServer(): Promise<void> {
 
           return {
             content: [{ type: 'text', text: lines.join('\n') }],
+          };
+        }
+
+        case 'create_note': {
+          const title = args?.title as string;
+          const body = args?.body as string;
+          const folder = args?.folder as string | undefined;
+
+          const result = createNote({ title, body, folder });
+
+          return {
+            content: [{ type: 'text', text: `✅ Created note "${result.name}" in folder "${result.folder}"` }],
+          };
+        }
+
+        case 'delete_note': {
+          const title = args?.title as string;
+          const folder = args?.folder as string | undefined;
+
+          const result = deleteNote(title, folder);
+
+          return {
+            content: [{ type: 'text', text: `✅ Deleted note "${result.name}"` }],
           };
         }
 

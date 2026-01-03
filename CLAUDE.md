@@ -18,17 +18,18 @@ make clean          # Remove dist/ and node_modules/
 
 ## Architecture
 
-Dual-mode CLI/MCP tool for searching Apple Notes:
+Dual-mode CLI/MCP tool for searching and managing Apple Notes:
 
 ```
 src/
-├── index.ts      # Entry point - routes to CLI or MCP mode based on --mcp flag
-├── cli.ts        # Commander-based CLI (search, recent, folders, read commands)
-├── mcp.ts        # MCP server exposing tools via @modelcontextprotocol/sdk
-├── indexer.ts    # Builds search indexes from Apple Notes database
-├── searcher.ts   # Queries indexes with fuzzy matching via MiniSearch
-├── formatter.ts  # Terminal output formatting with chalk
-└── types.ts      # Shared types and Apple date conversion utilities
+├── index.ts       # Entry point - routes to CLI or MCP mode based on --mcp flag
+├── cli.ts         # Commander-based CLI (search, recent, folders, read, create, delete commands)
+├── mcp.ts         # MCP server exposing tools via @modelcontextprotocol/sdk
+├── applescript.ts # AppleScript automation for create/delete operations
+├── indexer.ts     # Builds search indexes from Apple Notes database
+├── searcher.ts    # Queries indexes with fuzzy matching via MiniSearch
+├── formatter.ts   # Terminal output formatting with chalk
+└── types.ts       # Shared types and Apple date conversion utilities
 ```
 
 **Data flow:**
@@ -57,7 +58,9 @@ commands/
 ├── recent.md            # /notes:recent slash command
 ├── folders.md           # /notes:folders slash command
 ├── folder.md            # /notes:folder slash command
-└── read.md              # /notes:read slash command
+├── read.md              # /notes:read slash command
+├── create.md            # /notes:create slash command
+└── delete.md            # /notes:delete slash command
 ```
 
 ## Releasing

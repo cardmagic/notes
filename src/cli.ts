@@ -23,6 +23,7 @@ import {
   formatIndexProgress,
   formatNote,
 } from './formatter.js';
+import { createNote, deleteNote } from './applescript.js';
 
 const program = new Command();
 
@@ -187,6 +188,39 @@ program
       process.exit(1);
     } finally {
       closeConnections();
+    }
+  });
+
+program
+  .command('create <title>')
+  .description('Create a new note')
+  .option('-f, --folder <name>', 'Folder to create note in', 'Notes')
+  .option('-b, --body <text>', 'Note body content', '')
+  .action(async (title: string, options: { folder: string; body: string }) => {
+    try {
+      const result = createNote({
+        title,
+        body: options.body,
+        folder: options.folder,
+      });
+      console.log(`Created note "${result.name}" in folder "${result.folder}"`);
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('delete <title>')
+  .description('Delete a note by title')
+  .option('-f, --folder <name>', 'Folder containing the note')
+  .action(async (title: string, options: { folder?: string }) => {
+    try {
+      const result = deleteNote(title, options.folder);
+      console.log(`Deleted note "${result.name}"`);
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+      process.exit(1);
     }
   });
 
