@@ -23,8 +23,8 @@ export function formatNote(note: IndexedNote, showBody = false): string {
   const lockSuffix = note.isLocked ? chalk.red(' 🔒') : '';
   lines.push(titlePrefix + chalk.bold.cyan(note.title || 'Untitled') + lockSuffix);
 
-  // Folder
-  lines.push(chalk.dim(`📁 ${note.folder}`));
+  // Folder and ID
+  lines.push(chalk.dim(`📁 ${note.folder} | ID: ${note.id}`));
 
   // Snippet
   if (note.snippet) {
@@ -55,8 +55,8 @@ export function formatSearchResult(
   const highlightedTitle = highlightMatches(result.title || 'Untitled', query);
   lines.push(chalk.green('▶ ') + titlePrefix + chalk.bold.cyan(highlightedTitle) + lockSuffix);
 
-  // Folder
-  lines.push(chalk.dim(`  📁 ${result.folder}`));
+  // Folder and ID
+  lines.push(chalk.dim(`  📁 ${result.folder} | ID: ${result.id}`));
 
   // Highlighted snippet
   if (result.snippet) {
