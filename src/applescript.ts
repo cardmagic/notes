@@ -126,7 +126,10 @@ export function editNote(options: EditNoteOptions): EditNoteResult {
   const { title, body, folder } = options;
 
   const escapedTitle = escapeAppleScript(title);
-  const escapedBody = escapeAppleScript(body);
+  // Apple Notes uses the first line of the body as the title, so we prepend the title
+  // as an HTML heading to preserve it when setting the body
+  const fullBody = `<h1>${title}</h1><br>${body}`;
+  const escapedBody = escapeAppleScript(fullBody);
 
   let script: string;
   const targetFolder = folder || 'Notes';
