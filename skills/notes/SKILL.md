@@ -18,17 +18,15 @@ triggers:
 
 # Apple Notes Skill
 
-Search, browse, create, and delete Apple Notes with fuzzy matching.
-
-## Prerequisites
-
-Ensure the notes CLI is installed:
+Search, browse, create, edit, and delete Apple Notes with fuzzy matching. Uses globally installed `notes` cmdline tool. If a command fails ensure the notes CLI is installed (but don't do this preemptively):
 
 ```bash
 if ! command -v notes &> /dev/null; then
   pnpm add -g @cardmagic/notes
 fi
 ```
+
+When writing notes, use html formatting.
 
 ## Commands
 
