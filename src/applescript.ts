@@ -33,6 +33,50 @@ function escapeAppleScript(str: string): string {
   return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+/**
+ * Builds an AppleScript that finds a note by title and performs an operation on it.
+ * Handles folder scoping when provided.
+ *
+ * @param title - The note title to search for
+ * @param operation - AppleScript code to execute on the found note. The note is available
+ *                    as the `targetNote` variable. Should include a `return` statement.
+ *                    Example: `delete targetNote\nreturn "deleted"`
+ * @param folder - Optional folder name to scope the search
+ */
+function buildNoteOperationScript(
+  title: string,
+  operation: string,
+  folder?: string
+): string {
+  const escapedTitle = escapeAppleScript(title);
+
+  if (folder) {
+    const escapedFolder = escapeAppleScript(folder);
+    return `
+      tell application "Notes"
+        set targetFolder to folder "${escapedFolder}"
+        set matchingNotes to notes of targetFolder whose name is "${escapedTitle}"
+        if (count of matchingNotes) is 0 then
+          error "Note not found"
+        end if
+        set targetNote to item 1 of matchingNotes
+        ${operation}
+      end tell
+    `;
+  } else {
+    return `
+      tell application "Notes"
+        set matchingNotes to notes whose name is "${escapedTitle}"
+        if (count of matchingNotes) is 0 then
+          error "Note not found"
+        end if
+        set targetNote to item 1 of matchingNotes
+        ${operation}
+      end tell
+    `;
+  }
+}
+
 export function createNote(options: CreateNoteOptions): CreateNoteResult {
   const { title, body, folder = 'Notes' } = options;
 
@@ -70,34 +114,12 @@ export function createNote(options: CreateNoteOptions): CreateNoteResult {
 
 export function deleteNote(title: string, folder?: string): DeleteNoteResult {
   const escapedTitle = escapeAppleScript(title);
+  const operation = `
+    delete targetNote
+    return "${escapedTitle}"
+  `;
 
-  let script: string;
-
-  if (folder) {
-    const escapedFolder = escapeAppleScript(folder);
-    script = `
-      tell application "Notes"
-        set targetFolder to folder "${escapedFolder}"
-        set matchingNotes to notes of targetFolder whose name is "${escapedTitle}"
-        if (count of matchingNotes) is 0 then
-          error "Note not found"
-        end if
-        delete item 1 of matchingNotes
-        return "${escapedTitle}"
-      end tell
-    `;
-  } else {
-    script = `
-      tell application "Notes"
-        set matchingNotes to notes whose name is "${escapedTitle}"
-        if (count of matchingNotes) is 0 then
-          error "Note not found"
-        end if
-        delete item 1 of matchingNotes
-        return "${escapedTitle}"
-      end tell
-    `;
-  }
+  const script = buildNoteOperationScript(title, operation, folder);
 
   try {
     const result = execSync(`osascript -e '${script.replace(/'/g, "'\"'\"'")}'`, {
@@ -125,42 +147,18 @@ export function deleteNote(title: string, folder?: string): DeleteNoteResult {
 export function editNote(options: EditNoteOptions): EditNoteResult {
   const { title, body, folder } = options;
 
-  const escapedTitle = escapeAppleScript(title);
   // Apple Notes uses the first line of the body as the title, so we prepend the title
   // as an HTML heading to preserve it when setting the body
   const fullBody = `<h1>${title}</h1><br>${body}`;
   const escapedBody = escapeAppleScript(fullBody);
-
-  let script: string;
   const targetFolder = folder || 'Notes';
 
-  if (folder) {
-    const escapedFolder = escapeAppleScript(folder);
-    script = `
-      tell application "Notes"
-        set targetFolder to folder "${escapedFolder}"
-        set matchingNotes to notes of targetFolder whose name is "${escapedTitle}"
-        if (count of matchingNotes) is 0 then
-          error "Note not found"
-        end if
-        set targetNote to item 1 of matchingNotes
-        set body of targetNote to "${escapedBody}"
-        return name of targetNote
-      end tell
-    `;
-  } else {
-    script = `
-      tell application "Notes"
-        set matchingNotes to notes whose name is "${escapedTitle}"
-        if (count of matchingNotes) is 0 then
-          error "Note not found"
-        end if
-        set targetNote to item 1 of matchingNotes
-        set body of targetNote to "${escapedBody}"
-        return name of targetNote
-      end tell
-    `;
-  }
+  const operation = `
+    set body of targetNote to "${escapedBody}"
+    return name of targetNote
+  `;
+
+  const script = buildNoteOperationScript(title, operation, folder);
 
   try {
     const result = execSync(`osascript -e '${script.replace(/'/g, "'\"'\"'")}'`, {
