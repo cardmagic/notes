@@ -226,7 +226,7 @@ program
 
 program
   .command('edit [id]')
-  .description('Edit an existing note by ID or title')
+  .description('Edit an existing note by ID or title (ID takes precedence if both provided)')
   .option('-t, --title <name>', 'Edit by title instead of ID')
   .option('-b, --body <text>', 'New body content')
   .option('-f, --folder <name>', 'Folder containing the note (for disambiguation)')
@@ -237,9 +237,15 @@ program
         process.exit(1);
       }
 
+      if (!id && !options.title) {
+        console.error('Error: Either <id> or --title is required');
+        process.exit(1);
+      }
+
       let title: string;
       let folder: string | undefined = options.folder;
 
+      // ID takes precedence if both are provided
       if (id) {
         const noteId = parseInt(id, 10);
         if (isNaN(noteId)) {
@@ -255,11 +261,8 @@ program
 
         title = note.title;
         folder = folder || note.folder;
-      } else if (options.title) {
-        title = options.title;
       } else {
-        console.error('Error: Either <id> or --title is required');
-        process.exit(1);
+        title = options.title!;
       }
 
       const result = editNote({

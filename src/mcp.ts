@@ -206,7 +206,7 @@ export async function runMcpServer(): Promise<void> {
       },
       {
         name: 'edit_note',
-        description: 'Edit an existing note in Apple Notes (preserves created timestamp)',
+        description: 'Edit an existing note in Apple Notes (preserves created timestamp). If both id and title are provided, id takes precedence.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -410,8 +410,16 @@ export async function runMcpServer(): Promise<void> {
           const body = args?.body as string;
           let folder = args?.folder as string | undefined;
 
+          if (id === undefined && !titleArg) {
+            return {
+              content: [{ type: 'text', text: 'Either id or title is required.' }],
+              isError: true,
+            };
+          }
+
           let title: string;
 
+          // ID takes precedence if both are provided
           if (id !== undefined) {
             const note = await getNoteById(id);
             if (!note) {
@@ -422,13 +430,8 @@ export async function runMcpServer(): Promise<void> {
             }
             title = note.title;
             folder = folder || note.folder;
-          } else if (titleArg) {
-            title = titleArg;
           } else {
-            return {
-              content: [{ type: 'text', text: 'Either id or title is required.' }],
-              isError: true,
-            };
+            title = titleArg!;
           }
 
           const result = editNote({ title, body, folder });
