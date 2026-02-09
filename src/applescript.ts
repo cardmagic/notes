@@ -29,8 +29,18 @@ export interface EditNoteResult {
   folder: string;
 }
 
+/**
+ * Escapes a string for safe use in AppleScript string literals.
+ * Handles backslashes, quotes, newlines, and control characters.
+ */
 function escapeAppleScript(str: string): string {
-  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return str
+    .replace(/\\/g, '\\\\')           // Backslash must be first
+    .replace(/"/g, '\\"')             // Double quotes
+    .replace(/\n/g, '\\n')            // Newlines
+    .replace(/\r/g, '\\r')            // Carriage returns
+    .replace(/\t/g, '\\t')            // Tabs
+    .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F]/g, ''); // Strip other control chars
 }
 
 function escapeHtml(str: string): string {
@@ -40,6 +50,23 @@ function escapeHtml(str: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+/**
+ * Executes an AppleScript by passing it via stdin to avoid shell injection.
+ * This is more secure than using -e flag with shell escaping.
+ *
+ * @param script - The complete AppleScript to execute
+ * @returns The output from the script
+ * @throws Error if execution fails
+ */
+function executeAppleScript(script: string): string {
+  return execSync('osascript -', {
+    input: script,
+    encoding: 'utf-8',
+    timeout: 30000,
+    maxBuffer: 10 * 1024 * 1024, // 10MB for large note bodies
+  });
 }
 
 /**
@@ -102,10 +129,7 @@ export function createNote(options: CreateNoteOptions): CreateNoteResult {
   `;
 
   try {
-    const result = execSync(`osascript -e '${script.replace(/'/g, "'\"'\"'")}'`, {
-      encoding: 'utf-8',
-      timeout: 30000,
-    });
+    const result = executeAppleScript(script);
 
     return {
       success: true,
@@ -131,10 +155,7 @@ export function deleteNote(title: string, folder?: string): DeleteNoteResult {
   const script = buildNoteOperationScript(title, operation, folder);
 
   try {
-    const result = execSync(`osascript -e '${script.replace(/'/g, "'\"'\"'")}'`, {
-      encoding: 'utf-8',
-      timeout: 30000,
-    });
+    const result = executeAppleScript(script);
 
     return {
       success: true,
@@ -170,10 +191,7 @@ export function editNote(options: EditNoteOptions): EditNoteResult {
   const script = buildNoteOperationScript(title, operation, folder);
 
   try {
-    const result = execSync(`osascript -e '${script.replace(/'/g, "'\"'\"'")}'`, {
-      encoding: 'utf-8',
-      timeout: 30000,
-    });
+    const result = executeAppleScript(script);
 
     return {
       success: true,
@@ -206,10 +224,7 @@ export function listNoteFolders(): string[] {
   `;
 
   try {
-    const result = execSync(`osascript -e '${script.replace(/'/g, "'\"'\"'")}'`, {
-      encoding: 'utf-8',
-      timeout: 30000,
-    });
+    const result = executeAppleScript(script);
 
     return result.trim().split('\n').filter(Boolean);
   } catch (error) {
