@@ -224,10 +224,13 @@ export async function runMcpServer(): Promise<void> {
             },
             folder: {
               type: 'string',
-              description: 'Folder containing the note (for disambiguation when editing by title)',
+              description: 'Folder containing the note (optional and only for disambiguation when editing by title)',
             },
           },
-          required: ['body'],
+          anyOf: [
+            { required: ['id', 'body'] },
+            { required: ['title', 'body'] },
+          ],
         },
       },
     ],
