@@ -33,6 +33,15 @@ function escapeAppleScript(str: string): string {
   return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 /**
  * Builds an AppleScript that finds a note by title and performs an operation on it.
  * Handles folder scoping when provided.
@@ -149,7 +158,7 @@ export function editNote(options: EditNoteOptions): EditNoteResult {
 
   // Apple Notes uses the first line of the body as the title, so we prepend the title
   // as an HTML heading to preserve it when setting the body
-  const fullBody = `<h1>${title}</h1><br>${body}`;
+  const fullBody = `<h1>${escapeHtml(title)}</h1><br>${escapeHtml(body)}`;
   const escapedBody = escapeAppleScript(fullBody);
   const targetFolder = folder || 'Notes';
 
