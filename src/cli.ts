@@ -23,7 +23,7 @@ import {
   formatIndexProgress,
   formatNote,
 } from './formatter.js';
-import { createNote, deleteNote } from './applescript.js';
+import { createNote, deleteNote, editNote } from './applescript.js';
 
 const program = new Command();
 
@@ -221,6 +221,61 @@ program
     } catch (error) {
       console.error('Error:', (error as Error).message);
       process.exit(1);
+    }
+  });
+
+program
+  .command('edit [id]')
+  .description('Edit an existing note by ID or title (ID takes precedence if both provided)')
+  .option('-t, --title <name>', 'Edit by title instead of ID')
+  .option('-b, --body <text>', 'New body content')
+  .option('-f, --folder <name>', 'Folder containing the note (for disambiguation)')
+  .action(async (id: string | undefined, options: { title?: string; body?: string; folder?: string }) => {
+    try {
+      if (!options.body) {
+        console.error('Error: --body is required');
+        process.exit(1);
+      }
+
+      if (!id && !options.title) {
+        console.error('Error: Either <id> or --title is required');
+        process.exit(1);
+      }
+
+      let title: string;
+      let folder: string | undefined = options.folder;
+
+      // ID takes precedence if both are provided
+      if (id) {
+        const noteId = parseInt(id, 10);
+        if (isNaN(noteId)) {
+          console.error('Invalid note ID');
+          process.exit(1);
+        }
+
+        const note = await getNoteById(noteId);
+        if (!note) {
+          console.error('Note not found');
+          process.exit(1);
+        }
+
+        title = note.title;
+        folder = folder || note.folder;
+      } else {
+        title = options.title!;
+      }
+
+      const result = editNote({
+        title,
+        body: options.body,
+        folder,
+      });
+      console.log(`Updated note "${result.name}" in folder "${result.folder}"`);
+    } catch (error) {
+      console.error('Error:', (error as Error).message);
+      process.exit(1);
+    } finally {
+      closeConnections();
     }
   });
 

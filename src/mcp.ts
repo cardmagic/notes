@@ -12,7 +12,7 @@ import {
   listFolders,
   getNoteStats,
 } from './searcher.js';
-import { createNote, deleteNote } from './applescript.js';
+import { createNote, deleteNote, editNote } from './applescript.js';
 import type { IndexedNote, SearchResult } from './types.js';
 
 function formatNoteForMcp(note: IndexedNote): string {
@@ -204,6 +204,35 @@ export async function runMcpServer(): Promise<void> {
           required: ['title'],
         },
       },
+      {
+        name: 'edit_note',
+        description: 'Edit an existing note in Apple Notes (preserves created timestamp). If both id and title are provided, id takes precedence.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'number',
+              description: 'Note ID to edit (from search/recent results)',
+            },
+            title: {
+              type: 'string',
+              description: 'Edit by title instead of ID',
+            },
+            body: {
+              type: 'string',
+              description: 'New body content for the note',
+            },
+            folder: {
+              type: 'string',
+              description: 'Folder containing the note (optional and only for disambiguation when editing by title)',
+            },
+          },
+          anyOf: [
+            { required: ['id', 'body'] },
+            { required: ['title', 'body'] },
+          ],
+        },
+      },
     ],
   }));
 
@@ -372,6 +401,43 @@ export async function runMcpServer(): Promise<void> {
 
           return {
             content: [{ type: 'text', text: `✅ Deleted note "${result.name}"` }],
+          };
+        }
+
+        case 'edit_note': {
+          const id = args?.id as number | undefined;
+          const titleArg = args?.title as string | undefined;
+          const body = args?.body as string;
+          let folder = args?.folder as string | undefined;
+
+          if (id === undefined && !titleArg) {
+            return {
+              content: [{ type: 'text', text: 'Either id or title is required.' }],
+              isError: true,
+            };
+          }
+
+          let title: string;
+
+          // ID takes precedence if both are provided
+          if (id !== undefined) {
+            const note = await getNoteById(id);
+            if (!note) {
+              return {
+                content: [{ type: 'text', text: `Note with ID ${id} not found.` }],
+                isError: true,
+              };
+            }
+            title = note.title;
+            folder = folder || note.folder;
+          } else {
+            title = titleArg!;
+          }
+
+          const result = editNote({ title, body, folder });
+
+          return {
+            content: [{ type: 'text', text: `✅ Updated note "${result.name}" in folder "${result.folder}"` }],
           };
         }
 
