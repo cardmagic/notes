@@ -72,7 +72,7 @@ program
 
 program
   .command('read <id>')
-  .description('Read a note by ID')
+  .description('Read a note by ID (shown in search/recent output)')
   .action(async (id: string) => {
     try {
       const noteId = parseInt(id, 10);
