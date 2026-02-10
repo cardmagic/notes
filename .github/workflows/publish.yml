@@ -5,12 +5,13 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish:
-    runs-on: macos-latest
-    permissions:
-      contents: read
-      id-token: write
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -18,9 +19,10 @@ jobs:
           version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g npm@latest
       - run: pnpm install
       - run: pnpm run build
-      - run: npm publish --access public --provenance
+      - run: npm publish --access public
