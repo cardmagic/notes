@@ -1,30 +1,5 @@
 import { describe, it, expect } from 'vitest';
-
-// These functions are private in applescript.ts, so we test them
-// by importing the module and exercising the logic indirectly,
-// or we can re-implement the pure functions here for unit testing.
-// Since they're not exported, we test them as standalone pure functions.
-
-// Mirror of escapeAppleScript from applescript.ts
-function escapeAppleScript(str: string): string {
-  return str
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t')
-    .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F]/g, '');
-}
-
-// Mirror of escapeHtml from applescript.ts
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
+import { escapeAppleScript, escapeHtml, buildNoteOperationScript } from './applescript.js';
 
 describe('escapeAppleScript', () => {
   it('escapes backslashes', () => {
@@ -99,5 +74,38 @@ describe('escapeHtml', () => {
 
   it('handles empty strings', () => {
     expect(escapeHtml('')).toBe('');
+  });
+});
+
+describe('buildNoteOperationScript', () => {
+  it('generates script without folder scope', () => {
+    const script = buildNoteOperationScript('My Note', 'delete targetNote');
+    expect(script).toContain('tell application "Notes"');
+    expect(script).toContain('whose name is "My Note"');
+    expect(script).toContain('delete targetNote');
+    expect(script).not.toContain('set targetFolder');
+  });
+
+  it('generates script with folder scope', () => {
+    const script = buildNoteOperationScript('My Note', 'delete targetNote', 'Work');
+    expect(script).toContain('set targetFolder to folder "Work"');
+    expect(script).toContain('notes of targetFolder');
+    expect(script).toContain('whose name is "My Note"');
+  });
+
+  it('escapes title in the script', () => {
+    const script = buildNoteOperationScript('Note "with quotes"', 'delete targetNote');
+    expect(script).toContain('whose name is "Note \\"with quotes\\""');
+  });
+
+  it('escapes folder name in the script', () => {
+    const script = buildNoteOperationScript('Test', 'delete targetNote', 'My "Folder"');
+    expect(script).toContain('folder "My \\"Folder\\""');
+  });
+
+  it('includes error handling for note not found', () => {
+    const script = buildNoteOperationScript('Test', 'delete targetNote');
+    expect(script).toContain('count of matchingNotes');
+    expect(script).toContain('error "Note not found"');
   });
 });

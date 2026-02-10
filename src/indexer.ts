@@ -28,7 +28,7 @@ function ensureIndexDir(): void {
   }
 }
 
-function extractTextFromNoteData(data: Buffer | null): string {
+export function extractTextFromNoteData(data: Buffer | null): string {
   if (!data || data.length === 0) {
     return '';
   }
@@ -46,7 +46,7 @@ function extractTextFromNoteData(data: Buffer | null): string {
   }
 }
 
-function extractStringsFromBuffer(buffer: Buffer): string {
+export function extractStringsFromBuffer(buffer: Buffer): string {
   const strings: string[] = [];
   let currentString = '';
   let inString = false;
@@ -214,7 +214,7 @@ function createIndexTables(db: Database.Database): void {
   `);
 }
 
-function processNote(
+export function processNote(
   raw: RawNote,
   pdfTextByNote: Map<string, string>
 ): IndexedNote {

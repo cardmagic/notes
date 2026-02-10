@@ -33,7 +33,7 @@ export interface EditNoteResult {
  * Escapes a string for safe use in AppleScript string literals.
  * Handles backslashes, quotes, newlines, and control characters.
  */
-function escapeAppleScript(str: string): string {
+export function escapeAppleScript(str: string): string {
   return str
     .replace(/\\/g, '\\\\')           // Backslash must be first
     .replace(/"/g, '\\"')             // Double quotes
@@ -43,7 +43,7 @@ function escapeAppleScript(str: string): string {
     .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F]/g, ''); // Strip other control chars
 }
 
-function escapeHtml(str: string): string {
+export function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -79,7 +79,7 @@ function executeAppleScript(script: string): string {
  *                    Example: `delete targetNote\nreturn "deleted"`
  * @param folder - Optional folder name to scope the search
  */
-function buildNoteOperationScript(
+export function buildNoteOperationScript(
   title: string,
   operation: string,
   folder?: string
