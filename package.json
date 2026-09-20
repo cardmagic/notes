@@ -1,6 +1,6 @@
 {
   "name": "@cardmagic/notes",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "CLI and MCP server to search and browse Apple Notes",
   "author": {
     "name": "Lucas Carlson"
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "better-sqlite3": "13.0.3",
+    "better-sqlite3": "^13.0.3",
     "chalk": "6.0.0",
     "commander": "15.0.0",
     "minisearch": "7.2.0"
